@@ -37,17 +37,20 @@ def _decode_windows(value: object, shift: Shift) -> tuple[Window, ...]:
     return union_windows(windows)
 
 
-def decode_responses(body: object, shift: Shift) -> tuple[CandidateResponse, ...]:
-    if not isinstance(body, dict) or set(body) != {'candidates'}:
-        raise ValueError('站件正文须包含候选列表')
-    candidates = body['candidates']
-    if not isinstance(candidates, list) or not 1 <= len(candidates) <= 4:
+def decode_candidates(value: object, shift: Shift) -> tuple[CandidateResponse, ...]:
+    if not isinstance(value, list) or not 1 <= len(value) <= 4:
         raise ValueError('站件须有一至四个匿名候选')
     responses = []
-    for candidate in candidates:
+    for candidate in value:
         if not isinstance(candidate, dict) or set(candidate) != set(REPAIR_CHOICES):
             raise ValueError('每个匿名候选须包含四种检修响应')
         responses.append(CandidateResponse(tuple(
             _decode_windows(candidate[choice], shift) for choice in REPAIR_CHOICES
         )))
     return tuple(responses)
+
+
+def decode_responses(body: object, shift: Shift) -> tuple[CandidateResponse, ...]:
+    if not isinstance(body, dict) or set(body) != {'candidates'}:
+        raise ValueError('站件正文须包含候选列表')
+    return decode_candidates(body['candidates'], shift)

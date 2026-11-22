@@ -12,6 +12,7 @@ class ReceivedSource:
     station: str
     shift: Shift
     fingerprint: str
+    version: int = 1
 
 
 def fingerprint_evidence(original: bytes) -> str:
@@ -25,4 +26,5 @@ def bind_received_source(received_id: int, envelope: ValidatedEnvelope) -> Recei
         envelope.station,
         envelope.shift,
         fingerprint_evidence(envelope.original),
+        envelope.version,
     )
